@@ -3,6 +3,7 @@ import { runClaude } from "../services/claudeProcess.js";
 import { getAuthStatus } from "../services/authStatusService.js";
 import * as loginManager from "../services/loginSessionManager.js";
 import * as apiKeyService from "../services/apiKeyService.js";
+import { listModels } from "../services/modelsService.js";
 import { updateSessionAuth } from "../db/sessionRepository.js";
 
 // Everything under /auth: current status, the interactive login flow
@@ -32,7 +33,7 @@ authRouter.get("/login/stream", (req, res) => {
 
 authRouter.post("/login/start", (req, res) => {
   const started = loginManager.startLogin(req.uid, req.configDir);
-  if (!started) return res.status(409).json({ error: "Login sudah berjalan" });
+  if (!started) return res.status(409).json({ error: "A login is already in progress" });
   res.json({ ok: true });
 });
 
@@ -42,7 +43,7 @@ authRouter.post("/login/input", (req, res) => {
     return res.status(400).json({ error: "Field 'text' (string) is required" });
   }
   const sent = loginManager.sendInput(req.uid, text);
-  if (!sent) return res.status(409).json({ error: "Tidak ada proses login yang berjalan" });
+  if (!sent) return res.status(409).json({ error: "No login is currently in progress" });
   res.json({ ok: true });
 });
 
@@ -55,6 +56,17 @@ authRouter.post("/logout", async (req, res) => {
   const { stdout, stderr, code } = await runClaude(["auth", "logout"], req.configDir);
   await updateSessionAuth(req.uid, { loggedIn: false, email: null, orgName: null }).catch(() => {});
   res.json({ ok: code === 0, output: (stdout + stderr).trim() });
+});
+
+// Live model list for this account, fetched from Anthropic's own API
+// using the OAuth token the CLI already stores after login — see
+// modelsService.js for why this exists (the CLI has no such command).
+authRouter.get("/models", async (req, res) => {
+  try {
+    res.json({ models: await listModels(req.configDir) });
+  } catch (err) {
+    res.status(502).json({ error: err.message });
+  }
 });
 
 // API keys let this same identity (whichever session req.uid resolved
@@ -75,6 +87,6 @@ authRouter.post("/api-keys", async (req, res) => {
 
 authRouter.delete("/api-keys/:id", async (req, res) => {
   const removed = await apiKeyService.revokeApiKey(req.uid, req.params.id);
-  if (!removed) return res.status(404).json({ error: "Key tidak ditemukan" });
+  if (!removed) return res.status(404).json({ error: "Key not found" });
   res.json({ ok: true });
 });

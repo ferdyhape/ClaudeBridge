@@ -2,15 +2,17 @@ import fs from "node:fs/promises";
 import { sessionConfigDir } from "../config/claude.js";
 import { runClaude } from "./claudeProcess.js";
 import { killAndForget } from "./loginSessionManager.js";
+import { clearModelsCache } from "./modelsService.js";
 import { findStaleSessionIds, deleteSession } from "../db/sessionRepository.js";
 import { env } from "../config/env.js";
 
 // Revokes the login (best-effort) and wipes everything for a session: its
-// isolated folder on disk and its row in MySQL. Used both by manual admin
-// deletion and by the idle auto-expiry sweep below.
+// isolated folder on disk and its row in MySQL. Currently only called by
+// the idle auto-expiry sweep below.
 export async function retireSession(id) {
   const configDir = sessionConfigDir(id);
   killAndForget(id);
+  clearModelsCache(configDir);
   await runClaude(["auth", "logout"], configDir).catch(() => {});
   await fs.rm(configDir, { recursive: true, force: true }).catch(() => {});
   await deleteSession(id).catch(() => {});

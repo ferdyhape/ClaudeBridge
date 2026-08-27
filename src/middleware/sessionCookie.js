@@ -38,5 +38,5 @@ export function sessionCookie(req, res, next) {
 
   ensureSession(id, { userAgent: req.headers["user-agent"], ipAddress: req.ip })
     .then(next)
-    .catch((err) => res.status(500).json({ error: "Database tidak terhubung: " + err.message }));
+    .catch((err) => res.status(500).json({ error: "Database connection failed: " + err.message }));
 }

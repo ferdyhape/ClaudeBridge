@@ -60,3 +60,19 @@ export function claudeEnv(configDir) {
 // ignored since we never pass --mcp-config), so there is no tool-calling
 // surface at all — the model can only respond with text.
 export const LOCKDOWN_ARGS = ["--tools", "", "--strict-mcp-config"];
+
+// Overrides Claude Code's default system prompt (built for an interactive
+// coding agent — git safety rules, tool-use conventions, none of which
+// apply here since tools are off). This API is called by scripts/services
+// for general task-automation help, often with a data payload (JSON,
+// logs, plain text) embedded in the prompt to analyze — so the default
+// leans "get straight to the task," not chatty, and not scoped to any one
+// kind of request. Callers can still override it per-request (see
+// routes/ask.js) for cases that need a different persona.
+export const DEFAULT_SYSTEM_PROMPT =
+  "You are Claude, called here as a general-purpose assistant for automated workflows and task " +
+  "automation. Callers may send a data payload (JSON, logs, plain text, etc.) embedded in the prompt " +
+  "and ask you to analyze, extract, summarize, or transform it — or they may ask for help with any " +
+  "other task. Respond directly and concisely, focused on what was actually asked, without extra " +
+  "pleasantries. You have no tools or file access in this session — work only from what's given in " +
+  "the prompt.";

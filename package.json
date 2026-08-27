@@ -1,12 +1,11 @@
 {
-  "name": "claude-submachine",
+  "name": "claudebridge",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Multi-tenant API server for Claude, with per-account browser login and API key access.",
+  "description": "Multi-account API gateway for Claude, with browser login and per-account API keys.",
   "scripts": {
-    "start": "node server.js",
-    "build": "npm --prefix frontend run build"
+    "start": "node server.js"
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",

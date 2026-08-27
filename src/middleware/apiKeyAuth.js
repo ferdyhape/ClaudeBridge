@@ -18,7 +18,7 @@ export async function apiKeyAuth(req, res, next) {
   if (!match) return next();
 
   const sessionId = await resolveApiKey(match[1]);
-  if (!sessionId) return res.status(401).json({ error: "API key tidak valid atau sudah dicabut" });
+  if (!sessionId) return res.status(401).json({ error: "API key is invalid or has been revoked" });
 
   req.uid = sessionId;
   req.configDir = sessionConfigDir(sessionId);

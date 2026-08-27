@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import * as apiKeyRepository from "../db/apiKeyRepository.js";
 
-const KEY_PREFIX = "csk_"; // "claude sub-machine key" — grep-able if one ever leaks somewhere it shouldn't
+const KEY_PREFIX = "csk_"; // "ClaudeBridge key" — grep-able if one ever leaks somewhere it shouldn't
 const PREFIX_VISIBLE_CHARS = 10; // shown in the UI list so a user can tell keys apart without re-seeing the secret
 
 function hash(plaintext) {
@@ -19,12 +19,12 @@ export async function createApiKey(sessionId, name) {
   await apiKeyRepository.insertApiKey({
     id,
     sessionId,
-    name: name || "Tanpa nama",
+    name: name || "Unnamed",
     keyHash: hash(plaintext),
     keyPrefix,
   });
 
-  return { id, name: name || "Tanpa nama", key: plaintext, prefix: keyPrefix };
+  return { id, name: name || "Unnamed", key: plaintext, prefix: keyPrefix };
 }
 
 // Turns a presented API key into the session id it represents, or null if

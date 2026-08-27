@@ -7,7 +7,7 @@ import { env } from "./src/config/env.js";
 const app = createApp();
 
 app.listen(env.port, async () => {
-  console.log(`Claude sub-machine listening on http://localhost:${env.port}`);
+  console.log(`ClaudeBridge listening on http://localhost:${env.port}`);
   console.log(`Per-session credentials under: ${SESSIONS_ROOT}`);
 
   try {

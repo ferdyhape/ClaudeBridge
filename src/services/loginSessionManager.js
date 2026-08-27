@@ -75,7 +75,7 @@ export function sendInput(id, text) {
 export function cancelLogin(id) {
   const s = getState(id);
   if (!s.proc) return;
-  appendLog(id, "\n[dibatalkan oleh pengguna]\n");
+  appendLog(id, "\n[cancelled by user]\n");
   killProcessTree(s.proc);
 }
 

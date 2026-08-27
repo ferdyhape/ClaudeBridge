@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ClaudeBridge — API Docs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/theme.css" />
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <div class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M6 6l2 2M16 16l2 2M6 18l2-2M16 8l2-2"/></svg>
+      </span>
+      <span class="brand-name">ClaudeBridge</span>
+    </div>
+    <nav class="app-nav">
+      <a href="/" class="nav-link">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7a4 4 0 1 0-3.9 5H9v3H6v3H3v-3.17a2 2 0 0 1 .59-1.42L11.1 6.9A4 4 0 0 1 15 7zM16.5 6.5h.01"/></svg>
+        Account
+      </a>
+      <a href="/docs.html" class="nav-link active">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5C4 4.67 4.67 4 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5v-13zM20 5.5c0-.83-.67-1.5-1.5-1.5H12v16h6.5a1.5 1.5 0 0 0 1.5-1.5v-13z"/></svg>
+        Docs
+      </a>
+    </nav>
+  </div>
+</header>
+
+<main class="app-main">
+  <p class="eyebrow">Reference</p>
+  <h1 class="page-title">API Documentation</h1>
+  <p class="page-lede">
+    One base URL, no separate host. Get a key on the
+    <a href="/" style="color: var(--color-primary); font-weight: 500;">Account</a> page, then call anything below.
+    Examples use <code class="inline-code" id="originExample"></code>.
+  </p>
+
+  <div style="margin-top: 2rem;">
+
+    <section style="margin-bottom: 2rem;">
+      <h2 style="font-family: var(--font-display); font-size: 1.125rem; font-weight: 600; margin: 0 0 0.75rem;">Authentication</h2>
+      <div class="stack">
+        <p style="font-size: 0.875rem; line-height: 1.6; color: var(--color-on-surface-variant);">
+          Send it as <code class="inline-code">Authorization: Bearer &lt;key&gt;</code>. A key maps to one Claude
+          account, and every request with it runs isolated under that account. Invalid or revoked keys get a
+          <code class="inline-code">401</code>.
+        </p>
+        <div class="code-block">
+          <div class="code-block-label">
+            <span>Example header</span>
+            <button type="button" class="code-block-copy" data-copy>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9h10v10H9V9zM5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>
+              Copy
+            </button>
+          </div>
+          <pre>Authorization: Bearer csk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</pre>
+        </div>
+      </div>
+    </section>
+
+    <section style="margin-bottom: 2rem;">
+      <h2 style="font-family: var(--font-display); font-size: 1.125rem; font-weight: 600; margin: 0 0 0.75rem;">Talking to Claude</h2>
+
+      <div class="endpoint">
+        <div class="endpoint-header">
+          <span class="method method-post">POST</span>
+          <code class="endpoint-path">/ask</code>
+        </div>
+        <div class="endpoint-body">
+          <p>
+            One prompt in, one answer out. Text only — no tool or file access on Claude's side. Paste raw data
+            (JSON, logs, whatever) straight into <code class="inline-code">prompt</code> and ask it to work with that.
+          </p>
+
+          <div>
+            <div style="margin-bottom: 0.375rem; font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-on-surface-variant);">Body</div>
+            <ul class="field-list">
+              <li><code class="inline-code">prompt</code> <span style="font-size: 0.75rem;">(string, required)</span> — your question, instruction, or data.</li>
+              <li><code class="inline-code">sessionId</code> <span style="font-size: 0.75rem;">(string, optional)</span> — <code class="inline-code">session_id</code> from a previous response, to continue that conversation.</li>
+              <li><code class="inline-code">model</code> <span style="font-size: 0.75rem;">(string, optional)</span> — <code class="inline-code">haiku</code>, <code class="inline-code">sonnet</code>, <code class="inline-code">opus</code>, or a full model name. Defaults to the account's model.</li>
+              <li><code class="inline-code">systemPrompt</code> <span style="font-size: 0.75rem;">(string, optional)</span> — swap the default persona for this request.</li>
+            </ul>
+          </div>
+
+          <div class="code-block">
+            <div class="code-block-label"><span>Request — data analysis</span><button type="button" class="code-block-copy" data-copy><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9h10v10H9V9zM5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>Copy</span></button></div>
+            <pre>curl -X POST {{ORIGIN}}/ask \
+  -H "Authorization: Bearer csk_xxxx..." \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "Give a short analysis: {\"cpu\": 92, \"mem\": 81, \"disk\": 45}"}'</pre>
+          </div>
+
+          <div class="code-block">
+            <div class="code-block-label"><span>Response 200</span><button type="button" class="code-block-copy" data-copy><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9h10v10H9V9zM5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>Copy</span></button></div>
+            <pre>{
+  "result": "## System Data Analysis\n\nCPU 92% — critical, needs attention...",
+  "session_id": "a8157afe-ad41-4273-aaa5-c0d442136ad7",
+  "total_cost_usd": 0.0022,
+  "usage": { "input_tokens": 212, "output_tokens": 69 }
+}</pre>
+          </div>
+
+          <div class="code-block">
+            <div class="code-block-label"><span>Request — pick a model + override persona</span><button type="button" class="code-block-copy" data-copy><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9h10v10H9V9zM5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>Copy</span></button></div>
+            <pre>curl -X POST {{ORIGIN}}/ask \
+  -H "Authorization: Bearer csk_xxxx..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Reply with one word: ready",
+    "model": "haiku",
+    "systemPrompt": "You are a terse status-check responder."
+  }'</pre>
+          </div>
+
+          <div class="code-block">
+            <div class="code-block-label"><span>Response 4xx/5xx</span><button type="button" class="code-block-copy" data-copy><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9h10v10H9V9zM5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>Copy</span></button></div>
+            <pre>{ "error": "Field 'prompt' (string) is required" }</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="margin-bottom: 2rem;">
+      <h2 style="font-family: var(--font-display); font-size: 1.125rem; font-weight: 600; margin: 0 0 0.75rem;">Account status</h2>
+
+      <div class="endpoint">
+        <div class="endpoint-header">
+          <span class="method method-get">GET</span>
+          <code class="endpoint-path">/auth/status</code>
+        </div>
+        <div class="endpoint-body">
+          <p>Login status of the account this API key represents.</p>
+          <div class="code-block">
+            <div class="code-block-label"><span>Response 200</span><button type="button" class="code-block-copy" data-copy><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9h10v10H9V9zM5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>Copy</span></button></div>
+            <pre>{
+  "loggedIn": true,
+  "authMethod": "claude.ai",
+  "email": "name@example.com",
+  "orgName": "Example Org",
+  "subscriptionType": "team"
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-header">
+          <span class="method method-post">POST</span>
+          <code class="endpoint-path">/auth/logout</code>
+        </div>
+        <div class="endpoint-body">
+          <p>
+            Logs out the Claude account behind this key. The key itself stays valid — log back in on the Account
+            page whenever you want to use it again.
+          </p>
+          <div class="code-block">
+            <div class="code-block-label"><span>Response 200</span><button type="button" class="code-block-copy" data-copy><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9h10v10H9V9zM5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>Copy</span></button></div>
+            <pre>{ "ok": true, "output": "Successfully logged out..." }</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-header">
+          <span class="method method-get">GET</span>
+          <code class="endpoint-path">/whoami</code>
+        </div>
+        <div class="endpoint-body">
+          <p>The internal session id this API key/cookie represents. Useful for debugging.</p>
+          <div class="code-block">
+            <div class="code-block-label"><span>Response 200</span><button type="button" class="code-block-copy" data-copy><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9h10v10H9V9zM5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>Copy</span></button></div>
+            <pre>{ "uid": "b879026b-a18d-4cbd-bbbf-729daa6dbae0" }</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="margin-bottom: 2rem;">
+      <h2 style="font-family: var(--font-display); font-size: 1.125rem; font-weight: 600; margin: 0 0 0.75rem;">Managing API keys</h2>
+      <p style="font-size: 0.875rem; color: var(--color-on-surface-variant); margin: 0 0 0.75rem;">
+        From the Account page, or directly through these — handy for automated key rotation.
+      </p>
+
+      <div class="endpoint">
+        <div class="endpoint-header">
+          <span class="method method-get">GET</span>
+          <code class="endpoint-path">/auth/api-keys</code>
+        </div>
+        <div class="endpoint-body">
+          <p>Lists this account's API keys. The raw key value is never returned again after creation.</p>
+          <div class="code-block">
+            <div class="code-block-label"><span>Response 200</span><button type="button" class="code-block-copy" data-copy><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9h10v10H9V9zM5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>Copy</span></button></div>
+            <pre>{
+  "rows": [
+    {
+      "id": "3406ebd1-22f3-41a0-8df0-2b3dd68a52bb",
+      "name": "backup-script",
+      "key_prefix": "csk_-1AOM2",
+      "created_at": "2026-08-27T15:21:36.000Z",
+      "last_used_at": "2026-08-27T15:21:48.000Z"
+    }
+  ]
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-header">
+          <span class="method method-post">POST</span>
+          <code class="endpoint-path">/auth/api-keys</code>
+        </div>
+        <div class="endpoint-body">
+          <p>Creates a new API key for this account. The <code class="inline-code">key</code> value in the response only appears this once — save it immediately.</p>
+          <div class="code-block">
+            <div class="code-block-label"><span>Request</span><button type="button" class="code-block-copy" data-copy><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9h10v10H9V9zM5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>Copy</span></button></div>
+            <pre>{ "name": "backup-script" }</pre>
+          </div>
+          <div class="code-block">
+            <div class="code-block-label"><span>Response 200</span><button type="button" class="code-block-copy" data-copy><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9h10v10H9V9zM5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>Copy</span></button></div>
+            <pre>{
+  "id": "3406ebd1-22f3-41a0-8df0-2b3dd68a52bb",
+  "name": "backup-script",
+  "key": "csk_-1AOM2lMq8lpZshq_qAJH35Le0vbBysdvi7rdVXdpVY",
+  "prefix": "csk_-1AOM2"
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-header">
+          <span class="method method-delete">DELETE</span>
+          <code class="endpoint-path">/auth/api-keys/:id</code>
+        </div>
+        <div class="endpoint-body">
+          <p>Revokes one API key. Effective immediately — the next request with that key is rejected with 401.</p>
+          <div class="code-block">
+            <div class="code-block-label"><span>Response 200</span><button type="button" class="code-block-copy" data-copy><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9h10v10H9V9zM5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>Copy</span></button></div>
+            <pre>{ "ok": true }</pre>
+          </div>
+          <div class="code-block">
+            <div class="code-block-label"><span>Response 404</span><button type="button" class="code-block-copy" data-copy><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9h10v10H9V9zM5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>Copy</span></button></div>
+            <pre>{ "error": "Key not found" }</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="margin-bottom: 2rem;">
+      <h2 style="font-family: var(--font-display); font-size: 1.125rem; font-weight: 600; margin: 0 0 0.75rem;">Available models</h2>
+
+      <div class="endpoint">
+        <div class="endpoint-header">
+          <span class="method method-get">GET</span>
+          <code class="endpoint-path">/auth/models</code>
+        </div>
+        <div class="endpoint-body">
+          <p>
+            The real model ids your account can use (e.g. <code class="inline-code">claude-opus-4-5-20251101</code>),
+            fetched live from Anthropic. Any of these work as <code class="inline-code">model</code> on
+            <code class="inline-code">/ask</code> — the short aliases still work too.
+          </p>
+          <div class="code-block">
+            <div class="code-block-label"><span>Response 200</span><button type="button" class="code-block-copy" data-copy><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9h10v10H9V9zM5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>Copy</span></button></div>
+            <pre>{
+  "models": [
+    { "id": "claude-opus-5", "displayName": "Claude Opus 5" },
+    { "id": "claude-sonnet-5", "displayName": "Claude Sonnet 5" }
+  ]
+}</pre>
+          </div>
+
+          <div>
+            <div style="margin-bottom: 0.5rem; font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-on-surface-variant);">Right now</div>
+            <div id="modelsList" class="key-list"><div class="key-empty">Log in to see your models here.</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 style="font-family: var(--font-display); font-size: 1.125rem; font-weight: 600; margin: 0 0 0.75rem;">Notes</h2>
+      <ul class="field-list" style="padding-left: 1.25rem; list-style: disc;">
+        <li>New logins happen on the Account page — there's no login endpoint.</li>
+        <li>Requires an active Claude Pro, Max, or Team subscription. Free accounts can't log in here.</li>
+        <li>One account, many keys — create and revoke freely.</li>
+        <li><code class="inline-code">/auth/models</code> can 502 if the account's token needs a refresh. A successful <code class="inline-code">/ask</code> call fixes that.</li>
+      </ul>
+    </section>
+
+  </div>
+</main>
+
+<script src="/js/docs.js"></script>
+</body>
+</html>
