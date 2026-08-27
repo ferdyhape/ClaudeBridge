@@ -1,0 +1,43 @@
+import mysql from "mysql2/promise";
+import { env } from "../config/env.js";
+
+// The only module that knows how to reach MySQL at all — every other
+// module that needs data goes through sessionRepository.js instead of
+// touching this pool directly (Interface Segregation: callers see a
+// handful of purpose-built functions, never the raw connection).
+export let pool;
+
+export async function initDatabase() {
+  const bootstrap = await mysql.createConnection({
+    host: env.mysql.host,
+    port: env.mysql.port,
+    user: env.mysql.user,
+    password: env.mysql.password,
+  });
+  await bootstrap.query(`CREATE DATABASE IF NOT EXISTS \`${env.mysql.database}\` CHARACTER SET utf8mb4`);
+  await bootstrap.end();
+
+  pool = mysql.createPool({
+    host: env.mysql.host,
+    port: env.mysql.port,
+    user: env.mysql.user,
+    password: env.mysql.password,
+    database: env.mysql.database,
+    waitForConnections: true,
+    connectionLimit: 10,
+  });
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS sessions (
+      id CHAR(36) PRIMARY KEY,
+      label VARCHAR(255) NULL,
+      email VARCHAR(255) NULL,
+      org_name VARCHAR(255) NULL,
+      logged_in TINYINT(1) NOT NULL DEFAULT 0,
+      user_agent VARCHAR(255) NULL,
+      ip_address VARCHAR(45) NULL,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      last_active_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+  `);
+}

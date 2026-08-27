@@ -1,5 +1,5 @@
 import spawn from "cross-spawn";
-import { ROOT_DIR, CLAUDE_BIN, claudeEnv, sessionConfigDir } from "../config.js";
+import { ROOT_DIR, CLAUDE_BIN, claudeEnv, sessionConfigDir } from "../src/config/claude.js";
 
 // Terminal fallback, mainly for troubleshooting — normal usage is the
 // "Mulai Login" button per browser session in the web UI. An optional

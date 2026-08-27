@@ -1,7 +1,9 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-export const ROOT_DIR = path.dirname(fileURLToPath(import.meta.url));
+// Project root, regardless of how deep this file lives under src/.
+export const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
+export const PUBLIC_DIR = path.join(ROOT_DIR, "public");
 export const SESSIONS_ROOT = path.join(ROOT_DIR, ".claude-sessions");
 export const CLAUDE_BIN = process.platform === "win32" ? "claude.cmd" : "claude";
 
@@ -31,7 +33,8 @@ const PASSTHROUGH_VARS = [
 
 // One isolated "home" per browser session — credentials, settings, session
 // history, plugins — instead of the real %USERPROFILE%\.claude. Each id
-// is a per-session UUID (see server.js), so accounts never mix.
+// is a per-session UUID (see middleware/sessionCookie.js), so accounts
+// never mix.
 export function sessionConfigDir(id) {
   return path.join(SESSIONS_ROOT, id);
 }
