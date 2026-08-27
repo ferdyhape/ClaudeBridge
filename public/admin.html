@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Claude — sub machine — admin</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --border: #262b36;
+    --text: #e7e9ee;
+    --muted: #8a90a2;
+    --accent: #d97757;
+    --accent-text: #1a1310;
+    --danger: #e5484d;
+    --ok: #3fb950;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", Inter, Roboto, Arial, sans-serif;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+  }
+  header .title { display: flex; align-items: center; gap: 10px; font-weight: 600; }
+  header .title .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+  header a { color: var(--muted); font-size: 12.5px; text-decoration: underline; }
+  header a:hover { color: var(--text); }
+  main { max-width: 980px; margin: 0 auto; padding: 24px 20px 60px; }
+  .sub { color: var(--muted); font-size: 13px; margin: 0 0 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th { color: var(--muted); font-weight: 600; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.03em; }
+  td.id { font-family: ui-monospace, Consolas, monospace; color: var(--muted); }
+  tr.me td { color: var(--accent); }
+  .badge { padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); font-size: 11px; }
+  .badge.ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, var(--border)); }
+  .badge.bad { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, var(--border)); }
+  button.del {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 6px;
+    padding: 4px 9px;
+    font-size: 11.5px;
+    cursor: pointer;
+  }
+  button.del:hover { color: #ffb4b4; border-color: color-mix(in srgb, var(--danger) 40%, var(--border)); }
+  .empty { color: var(--muted); font-size: 13px; padding: 30px 0; text-align: center; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title"><span class="dot"></span> Claude — sub machine — admin</div>
+  <a href="/">← kembali ke chat</a>
+</header>
+
+<main>
+  <p class="sub" id="subline">Memuat…</p>
+  <table>
+    <thead>
+      <tr>
+        <th>ID sesi</th>
+        <th>Login</th>
+        <th>Email</th>
+        <th>Organisasi</th>
+        <th>Dibuat</th>
+        <th>Terakhir aktif</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <div id="empty" class="empty hidden">Belum ada sesi.</div>
+</main>
+
+<script>
+(() => {
+  const rowsEl = document.getElementById("rows");
+  const emptyEl = document.getElementById("empty");
+  const sublineEl = document.getElementById("subline");
+
+  function fmtDate(s) {
+    if (!s) return "—";
+    const d = new Date(s);
+    return d.toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" });
+  }
+
+  async function load() {
+    const r = await fetch("/admin/api/sessions");
+    const data = await r.json();
+    if (!r.ok) {
+      sublineEl.textContent = "Gagal memuat: " + (data.error || r.status);
+      return;
+    }
+    sublineEl.textContent = `${data.rows.length} sesi terdaftar · auto-hapus setelah ${data.maxIdleDays} hari tidak aktif.`;
+    rowsEl.innerHTML = "";
+    emptyEl.classList.toggle("hidden", data.rows.length > 0);
+
+    for (const row of data.rows) {
+      const tr = document.createElement("tr");
+      if (row.id === data.currentUid) tr.className = "me";
+      tr.innerHTML = `
+        <td class="id">${row.id.slice(0, 8)}${row.id === data.currentUid ? " (kamu)" : ""}</td>
+        <td><span class="badge ${row.logged_in ? "ok" : "bad"}">${row.logged_in ? "login" : "belum login"}</span></td>
+        <td>${row.email || "—"}</td>
+        <td>${row.org_name || "—"}</td>
+        <td>${fmtDate(row.created_at)}</td>
+        <td>${fmtDate(row.last_active_at)}</td>
+        <td><button class="del" data-id="${row.id}" type="button">Hapus</button></td>
+      `;
+      rowsEl.appendChild(tr);
+    }
+
+    rowsEl.querySelectorAll("button.del").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        if (!confirm("Hapus sesi ini? Login/kredensialnya akan di-revoke dan foldernya dihapus permanen.")) return;
+        btn.disabled = true;
+        await fetch("/admin/api/sessions/" + btn.dataset.id, { method: "DELETE" });
+        load();
+      });
+    });
+  }
+
+  load();
+  setInterval(load, 10000);
+})();
+</script>
+</body>
+</html>

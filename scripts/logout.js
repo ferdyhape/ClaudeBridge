@@ -1,0 +1,13 @@
+import spawn from "cross-spawn";
+import { ROOT_DIR, CLAUDE_BIN, claudeEnv, sessionConfigDir } from "../config.js";
+
+const id = process.argv[2] || "_manual";
+const configDir = sessionConfigDir(id);
+
+const child = spawn(CLAUDE_BIN, ["auth", "logout"], {
+  cwd: ROOT_DIR,
+  env: claudeEnv(configDir),
+  stdio: "inherit",
+});
+
+child.on("exit", (code) => process.exit(code ?? 0));
