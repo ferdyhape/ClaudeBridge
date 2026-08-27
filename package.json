@@ -3,12 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Local HTTP server that lets you ask Claude questions, with its own isolated login/credentials folder.",
+  "description": "Multi-tenant API server for Claude, with per-account browser login and API key access.",
   "scripts": {
     "start": "node server.js",
-    "login": "node scripts/login.js",
-    "logout": "node scripts/logout.js",
-    "status": "node scripts/status.js"
+    "build": "npm --prefix frontend run build"
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",

@@ -9,7 +9,13 @@ const UUID_RE = /^[0-9a-f-]{36}$/i;
 // Only mounted on the routes that actually need it (see app.js) — static
 // asset requests never touch this, so they can't race an API call for a
 // fresh cookie on a browser's very first page load.
+//
+// Steps aside if identity was already resolved upstream (see
+// apiKeyAuth.js, mounted before this in app.js) — an API-key request has
+// no reason to also be issued a browser cookie.
 export function sessionCookie(req, res, next) {
+  if (req.uid) return next();
+
   let id = req.cookies[env.session.cookieName];
   if (!id || !UUID_RE.test(id)) {
     id = crypto.randomUUID();
@@ -33,14 +39,4 @@ export function sessionCookie(req, res, next) {
   ensureSession(id, { userAgent: req.headers["user-agent"], ipAddress: req.ip })
     .then(next)
     .catch((err) => res.status(500).json({ error: "Database tidak terhubung: " + err.message }));
-}
-
-// Reads the session id if the request already has one, without ever
-// minting a new cookie or writing to the database. Use this for routes
-// that merely want to know "is this viewer also a registered session"
-// (e.g. highlighting "you" in the admin list) — they must stay free of
-// the side effect of creating a session just from being viewed.
-export function peekSessionId(req) {
-  const id = req.cookies[env.session.cookieName];
-  return id && UUID_RE.test(id) ? id : null;
 }

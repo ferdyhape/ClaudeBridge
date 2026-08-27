@@ -9,7 +9,6 @@ const app = createApp();
 app.listen(env.port, async () => {
   console.log(`Claude sub-machine listening on http://localhost:${env.port}`);
   console.log(`Per-session credentials under: ${SESSIONS_ROOT}`);
-  console.log(`Admin overview: http://localhost:${env.port}/admin.html`);
 
   try {
     await initDatabase();

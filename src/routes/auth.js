@@ -2,6 +2,7 @@ import { Router } from "express";
 import { runClaude } from "../services/claudeProcess.js";
 import { getAuthStatus } from "../services/authStatusService.js";
 import * as loginManager from "../services/loginSessionManager.js";
+import * as apiKeyService from "../services/apiKeyService.js";
 import { updateSessionAuth } from "../db/sessionRepository.js";
 
 // Everything under /auth: current status, the interactive login flow
@@ -54,4 +55,26 @@ authRouter.post("/logout", async (req, res) => {
   const { stdout, stderr, code } = await runClaude(["auth", "logout"], req.configDir);
   await updateSessionAuth(req.uid, { loggedIn: false, email: null, orgName: null }).catch(() => {});
   res.json({ ok: code === 0, output: (stdout + stderr).trim() });
+});
+
+// API keys let this same identity (whichever session req.uid resolved
+// to — cookie or an existing key) be driven from outside a browser, e.g.
+// `curl -H "Authorization: Bearer csk_..." .../ask`. Management is
+// self-service only: there's no admin visibility into key values or
+// listings, by design (see the earlier scoping discussion).
+
+authRouter.get("/api-keys", async (req, res) => {
+  res.json({ rows: await apiKeyService.listApiKeys(req.uid) });
+});
+
+authRouter.post("/api-keys", async (req, res) => {
+  const { name } = req.body || {};
+  const created = await apiKeyService.createApiKey(req.uid, typeof name === "string" ? name.trim() : "");
+  res.json(created);
+});
+
+authRouter.delete("/api-keys/:id", async (req, res) => {
+  const removed = await apiKeyService.revokeApiKey(req.uid, req.params.id);
+  if (!removed) return res.status(404).json({ error: "Key tidak ditemukan" });
+  res.json({ ok: true });
 });

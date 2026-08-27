@@ -40,4 +40,23 @@ export async function initDatabase() {
       last_active_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
   `);
+
+  // Only the SHA-256 hash of a key is ever stored — the plaintext exists
+  // for exactly one response, at creation time, and nowhere else. Tied to
+  // its session with ON DELETE CASCADE so retiring/expiring a session
+  // (see sessionLifecycle.js) automatically revokes every key under it.
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS api_keys (
+      id CHAR(36) PRIMARY KEY,
+      session_id CHAR(36) NOT NULL,
+      name VARCHAR(255) NOT NULL,
+      key_hash CHAR(64) NOT NULL,
+      key_prefix VARCHAR(20) NOT NULL,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      last_used_at DATETIME NULL,
+      UNIQUE KEY uniq_key_hash (key_hash),
+      INDEX idx_session (session_id),
+      FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+  `);
 }

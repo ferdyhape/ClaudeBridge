@@ -1,5 +1,10 @@
 node_modules/
+frontend/node_modules/
 .claude-config/
 .claude-sessions/
 .env
 *.log
+
+# Built by `npm run build` (frontend/ -> here). Source of truth is
+# frontend/src/ — this directory is regenerated, not hand-edited.
+/public/

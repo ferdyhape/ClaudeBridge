@@ -31,15 +31,6 @@ export async function updateSessionAuth(id, { loggedIn, email, orgName }) {
   ]);
 }
 
-export async function renameSession(id, label) {
-  await pool.query(`UPDATE sessions SET label = ? WHERE id = ?`, [label || null, id]);
-}
-
-export async function listSessions() {
-  const [rows] = await pool.query(`SELECT * FROM sessions ORDER BY last_active_at DESC`);
-  return rows;
-}
-
 export async function findStaleSessionIds(maxIdleDays) {
   const [rows] = await pool.query(
     `SELECT id FROM sessions WHERE last_active_at < (NOW() - INTERVAL ? DAY)`,
