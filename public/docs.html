@@ -89,6 +89,17 @@
             </ul>
           </div>
 
+          <p style="font-size: 0.8125rem;">
+            <strong>On <code class="inline-code">sessionId</code>:</strong> not the default — omit it and every call is a
+            fresh, independent request, which is what most integrations want. Pass it back only when you're
+            genuinely continuing one conversation across multiple calls: it does make each next reply a bit
+            faster (the model's cache for that context is already warm), but the trade-off is that the
+            conversation's context — and so the cost of every following call — keeps growing the longer you keep
+            resuming it. For a long-running or high-volume integration, that adds up; start a fresh session
+            (drop <code class="inline-code">sessionId</code>) once a thread has run its course instead of resuming
+            it indefinitely.
+          </p>
+
           <div class="code-block">
             <div class="code-block-label"><span>Request — data analysis</span><button type="button" class="code-block-copy" data-copy><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9h10v10H9V9zM5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>Copy</span></button></div>
             <pre>curl -X POST {{ORIGIN}}/ask \
