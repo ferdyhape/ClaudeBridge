@@ -15,6 +15,7 @@
     btn.addEventListener("click", async () => {
       const pre = btn.closest(".code-block").querySelector("pre");
       const ok = await copyText(pre.textContent);
+      if (!label) return;
       label.textContent = ok ? "Copied" : "Select & copy manually";
       setTimeout(() => {
         label.textContent = "Copy";
