@@ -14,15 +14,11 @@
     const label = btn.querySelector("span");
     btn.addEventListener("click", async () => {
       const pre = btn.closest(".code-block").querySelector("pre");
-      try {
-        await navigator.clipboard.writeText(pre.textContent);
-        label.textContent = "Copied";
-        setTimeout(() => {
-          label.textContent = "Copy";
-        }, 1500);
-      } catch {
-        /* clipboard unavailable; the text stays selectable by hand */
-      }
+      const ok = await copyText(pre.textContent);
+      label.textContent = ok ? "Copied" : "Select & copy manually";
+      setTimeout(() => {
+        label.textContent = "Copy";
+      }, 1500);
     });
   });
 

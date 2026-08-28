@@ -256,12 +256,8 @@
         </div>
       `;
       document.getElementById("copyNewKeyBtn").addEventListener("click", async (e) => {
-        try {
-          await navigator.clipboard.writeText(created.key);
-          e.currentTarget.querySelector("span").textContent = "Copied";
-        } catch {
-          /* clipboard unavailable; the key stays selectable by hand */
-        }
+        const ok = await copyText(created.key);
+        e.currentTarget.querySelector("span").textContent = ok ? "Copied" : "Select & copy manually";
       });
       loadApiKeys();
     } finally {
