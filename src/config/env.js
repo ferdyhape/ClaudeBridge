@@ -21,4 +21,9 @@ export const env = {
     maxIdleDays: Number(process.env.SESSION_MAX_IDLE_DAYS || 30),
     cleanupIntervalMs: 6 * 60 * 60 * 1000, // how often the idle-session sweep runs
   },
+
+  // On by default (personal/portfolio use). Deployments that don't want
+  // personal branding — e.g. once this is registered as an internal
+  // company tool — can turn it off without patching the served files.
+  showBrandFooter: process.env.SHOW_BRAND_FOOTER !== "false",
 };

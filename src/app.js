@@ -7,6 +7,7 @@ import { healthRouter } from "./routes/health.js";
 import { whoamiRouter } from "./routes/whoami.js";
 import { authRouter } from "./routes/auth.js";
 import { askRouter } from "./routes/ask.js";
+import { pagesRouter } from "./routes/pages.js";
 
 // Wires the app together: middleware order + route mounting. Nothing in
 // here knows HOW any route or service works — that's Open/Closed in
@@ -18,10 +19,12 @@ export function createApp() {
   app.use(cookieParser());
   app.use(express.json({ limit: "1mb" }));
 
-  // Static files (the built React app's index.html + assets, the
-  // browser's own favicon.ico probe, ...) never need a session, so
-  // they're served before the session middleware below — that also means
-  // they never trigger a DB write.
+  // index.html and docs.html go through a tiny templating step (see
+  // pages.js) before falling through to express.static for everything
+  // else — css/js/logo, the browser's own favicon.ico probe, etc. None of
+  // this needs a session, so it all runs before the session middleware
+  // below, which also means it never triggers a DB write.
+  app.use(pagesRouter);
   app.use(express.static(PUBLIC_DIR));
 
   app.use(healthRouter);
